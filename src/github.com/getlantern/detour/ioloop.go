@@ -75,6 +75,7 @@ func (dc *Conn) ioLoop() {
 				}()
 			}
 		case r := <-chRemoveConn:
+			atomic.AddUint32(&dc.expectedConns, ^uint32(0))
 			conns.Remove(r)
 		case req := <-dc.chReadRequest:
 			chMergeReads := make(chan innerReadResult)
@@ -102,11 +103,11 @@ func (dc *Conn) ioLoop() {
 				// one to caller and ignore later, or return the
 				// last error if both failed.
 				m := merger{
-					chMerge: chMergeReads,
-					addr:    dc.addr,
-					tries:   conns.Len(),
-					req:     &req,
-					chClose: dc.chClose,
+					chMerge:       chMergeReads,
+					expectedConns: &dc.expectedConns,
+					addr:          dc.addr,
+					req:           &req,
+					chClose:       dc.chClose,
 				}
 				connsToRemove := m.run()
 				for _, c := range connsToRemove {
@@ -251,17 +252,17 @@ func (r *reader) run() {
 }
 
 type merger struct {
-	chMerge chan innerReadResult
-	addr    string
-	tries   int
-	req     *ioRequest
-	chClose chan struct{}
+	chMerge       chan innerReadResult
+	expectedConns *uint32
+	addr          string
+	req           *ioRequest
+	chClose       chan struct{}
 }
 
 func (m *merger) run() (connsToRemove []conn) {
 	var got bool
-	merges := m.tries
-	for i := 0; i < merges; i++ {
+	var i uint32 = 0
+	for ; i < atomic.LoadUint32(m.expectedConns); i++ {
 		var result innerReadResult
 		select {
 		case result = <-m.chMerge:
@@ -271,14 +272,13 @@ func (m *merger) run() (connsToRemove []conn) {
 		}
 		c, buf, n, err := result.c, result.buf, len(result.buf), result.err
 		if err != nil {
-			log.Tracef("Read from %s connection to %s failed, closing: %s", c.Type(), m.addr, err)
+			log.Debugf("Read from %s connection to %s failed, closing: %s", c.Type(), m.addr, err)
 			closeConn(c)
 			connsToRemove = append(connsToRemove, c)
 			if i == 0 && c.Type() == connTypeDirect {
-				log.Debugf("Ignore first error from %s connection to %s: %s", c.Type(), m.addr, result.err)
-				// we know that reads from detour connection will come unless we failed to connect it.
-				// It does few harm if so, as m.chClose will prevent the goroutine from wait infinitely.
-				merges = 2
+				log.Tracef("Ignore first error from %s connection to %s: %s", c.Type(), m.addr, result.err)
+				// we know that reads from detour connection will come soon unless we failed to connect it.
+				// It does no harm in that case, as m.chClose will prevent the goroutine from wait infinitely.
 				continue
 			}
 		} else {
