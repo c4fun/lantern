@@ -15,6 +15,7 @@ import (
 
 var (
 	log = golog.LoggerFor("tlsdialer")
+    Callback net.DialCallback
 )
 
 type timeoutError struct{}
@@ -119,7 +120,7 @@ func DialForTimings(dialer *net.Dialer, network, addr string, sendServerName boo
 
 	log.Tracef("Dialing %s %s (%s)", network, addr, result.ResolvedAddr)
 	start = time.Now()
-	rawConn, err := dialer.Dial(network, result.ResolvedAddr.String())
+	rawConn, err := net.DialInternal(dialer, network, result.ResolvedAddr.String(), Callback)
 	if err != nil {
 		return result, err
 	}
