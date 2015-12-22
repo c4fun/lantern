@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os/user"
 	"path/filepath"
-	"runtime"
 
 	"github.com/getlantern/golog"
 )
@@ -19,10 +18,7 @@ var (
 // General returns the path for general aplication resources (e.g.
 // ~/Library/<App>).
 func General(app string) string {
-	if runtime.GOOS == "android" {
-		return AndroidDir
-	}
-	return general(app)
+    return AndroidDir
 }
 
 // Logs returns the path for log files (e.g. ~/Library/Logs/<App>).

@@ -9,11 +9,9 @@ import (
 	"errors"
 	"fmt"
 	"net"
-	"runtime"
 	"time"
 
 	"github.com/getlantern/golog"
-	"github.com/getlantern/lantern-mobile/lantern/protected"
 )
 
 var (
@@ -126,11 +124,7 @@ func DialForTimings(dialer *net.Dialer, network, addr string, sendServerName boo
 
 	resolvedAddr := result.ResolvedAddr.String()
 
-	if runtime.GOOS == "android" && protected.VpnMode() {
-		rawConn, err = protected.Dial(network, resolvedAddr)
-	} else {
-		rawConn, err = dialer.Dial(network, resolvedAddr)
-	}
+    rawConn, err = dialer.Dial(network, resolvedAddr)
 
 	if err != nil {
 		return result, err

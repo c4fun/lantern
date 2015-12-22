@@ -10,7 +10,6 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"runtime"
 	"sort"
 	"strings"
 	"time"
@@ -75,12 +74,7 @@ type Config struct {
 }
 
 func init() {
-	if runtime.GOOS == "android" {
-		chainedCloudConfigUrl = "http://config.getiantem.org/cloud-android.yaml.gz"
-	} else {
-		chainedCloudConfigUrl = "http://config.getiantem.org/cloud.yaml.gz"
-
-	}
+    chainedCloudConfigUrl = "http://config.getiantem.org/cloud-android.yaml.gz"
 }
 
 // StartPolling starts the process of polling for new configuration files.

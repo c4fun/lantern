@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"os/exec"
-	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -25,20 +24,7 @@ var (
 )
 
 func init() {
-
-	if runtime.GOOS == "android" {
-		return
-	}
-
-	upnpcBytes, err := Asset("upnpc")
-	if err != nil {
-		panic(fmt.Errorf("Unable to read upnpc bytes: %s", err))
-	}
-
-	upnpcbe, err = byteexec.New(upnpcBytes, "upnpc")
-	if err != nil {
-		panic(fmt.Errorf("Unable to construct byteexec for upnpc: %s", err))
-	}
+    return
 }
 
 type upnpIGD struct {

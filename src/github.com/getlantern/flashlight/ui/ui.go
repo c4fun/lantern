@@ -49,18 +49,7 @@ func init() {
 		log.Debugf("Creating tarfs filesystem that prefers local resources at %v", absLocalResourcesPath)
 	}
 
-	if runtime.GOOS == "android" {
-		return
-	}
-
-	var err error
-	fs, err = tarfs.New(Resources, localResourcesPath)
-	if err != nil {
-		// Panicking here because this shouldn't happen at runtime unless the
-		// resources were incorrectly embedded.
-		panic(fmt.Errorf("Unable to open tarfs filesystem: %v", err))
-	}
-	Translations = fs.SubDir("locale")
+	return
 }
 
 func Handle(p string, handler http.Handler) string {

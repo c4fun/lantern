@@ -135,7 +135,7 @@ func doMain() error {
 	// Run below in separate goroutine as config.Init() can potentially block when Lantern runs
 	// for the first time. User can still quit Lantern through systray menu when it happens.
 	go func() {
-		isAndroid := runtime.GOOS == "android"
+		isAndroid := true
 		cfgFn := func(cfg *config.Config) {
 			if *help || cfg.Addr == "" || (cfg.Role != "server" && cfg.Role != "client") {
 				flag.Usage()

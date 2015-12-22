@@ -5,7 +5,6 @@ import (
 	"io"
 	"net"
 	"net/http"
-	"runtime"
 	"strconv"
 	"sync"
 
@@ -91,11 +90,8 @@ func (client *Client) intercept(resp http.ResponseWriter, req *http.Request) {
 		return client.GetBalancer().Dial("connect", addr)
 	}
 
-	if runtime.GOOS == "android" || client.ProxyAll {
-		connOut, err = d("tcp", addr)
-	} else {
-		connOut, err = detour.Dialer(d)("tcp", addr)
-	}
+    connOut, err = detour.Dialer(d)("tcp", addr)
+
 	if err != nil {
 		log.Debugf("Could not dial %v", err)
 		respondBadGatewayHijacked(clientConn, req)

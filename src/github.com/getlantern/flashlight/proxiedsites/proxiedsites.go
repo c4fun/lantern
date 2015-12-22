@@ -1,9 +1,7 @@
 package proxiedsites
 
 import (
-	"encoding/json"
 	"fmt"
-	"runtime"
 	"sync"
 
 	"github.com/getlantern/detour"
@@ -34,32 +32,8 @@ func Configure(cfg *proxiedsites.Config) {
 		updateDetour(delta)
 	}
 
-	if runtime.GOOS == "android" {
-		startMutex.Unlock()
-		return
-	}
-
-	if service == nil {
-		// Initializing service.
-		if err := start(); err != nil {
-			log.Errorf("Unable to register service: %q", err)
-		}
-	} else if delta != nil {
-		// Sending delta.
-		message := ui.Envelope{
-			EnvelopeType: ui.EnvelopeType{messageType},
-			Message:      delta,
-		}
-		b, err := json.Marshal(message)
-
-		if err != nil {
-			log.Errorf("Unable to publish delta to UI: %v", err)
-		} else {
-			service.Out <- b
-		}
-	}
-
-	startMutex.Unlock()
+    startMutex.Unlock()
+    return
 }
 
 func updateDetour(delta *proxiedsites.Delta) {

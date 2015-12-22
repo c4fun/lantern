@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"reflect"
-	"runtime"
 	"sync"
 	"time"
 
@@ -19,7 +18,6 @@ import (
 	"github.com/getlantern/flashlight/proxiedsites"
 	"github.com/getlantern/flashlight/settings"
 	"github.com/getlantern/flashlight/statreporter"
-	"github.com/getlantern/flashlight/statserver"
 	"github.com/getlantern/flashlight/util"
 	"github.com/getlantern/fronted"
 	"github.com/getlantern/golog"
@@ -119,14 +117,6 @@ func (client *Client) ApplyClientConfig(cfg *config.Config) {
 	// Update client configuration and get the highest QOS dialer available.
 	client.Configure(cfg.Client)
 
-	// We offload this onto a go routine because creating the http clients
-	// blocks on waiting for the local server, and the local server starts
-	// later on this same thread, so it would otherwise creating a deadlock.
-	if runtime.GOOS != "android" {
-		go func() {
-			withHttpClient(cfg.Addr, statserver.Configure)
-		}()
-	}
 }
 
 func withHttpClient(addr string, withClient func(client *http.Client)) {

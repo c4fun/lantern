@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"path/filepath"
-	"runtime"
 	"sync"
 
 	"code.google.com/p/go-uuid/uuid"
@@ -84,29 +83,10 @@ func Load(version, revisionDate, buildDate string) *Settings {
 		// Just keep going with the original settings not from disk.
 	}
 
-	// don't create an launch file on android
-	if runtime.GOOS != "android" && settings.AutoLaunch {
-		launcher.CreateLaunchFile(settings.AutoLaunch)
-	}
-
 	// always override below 3 attributes as they are not meant to be persisted across versions
 	settings.Version = version
 	settings.BuildDate = buildDate
 	settings.RevisionDate = revisionDate
-
-	// Only configure the UI once. This will typically be the case in the normal
-	// application flow, but tests might call Load twice, for example, which we
-	// want to allow.
-	if runtime.GOOS != "android" {
-		once.Do(func() {
-			err := start(settings)
-			if err != nil {
-				log.Errorf("Unable to register settings service: %q", err)
-				return
-			}
-			go read()
-		})
-	}
 
 	return settings
 }
