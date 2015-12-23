@@ -22,6 +22,7 @@ import (
 
 var (
 	outs atomic.Value
+    Verbose bool
 )
 
 func init() {
@@ -154,11 +155,15 @@ func (l *logger) printf(out io.Writer, skipFrames int, severity string, message 
 }
 
 func (l *logger) Debug(arg interface{}) {
-	l.print(GetOutputs().DebugOut, 4, "DEBUG", arg)
+    if Verbose {
+        l.print(GetOutputs().DebugOut, 4, "DEBUG", arg)
+    }
 }
 
 func (l *logger) Debugf(message string, args ...interface{}) {
-	l.printf(GetOutputs().DebugOut, 4, "DEBUG", message, args...)
+    if Verbose {
+        l.printf(GetOutputs().DebugOut, 4, "DEBUG", message, args...)
+    }
 }
 
 func (l *logger) Error(arg interface{}) {

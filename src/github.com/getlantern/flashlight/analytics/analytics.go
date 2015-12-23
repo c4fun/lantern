@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	trackingId  = "UA-21815217-12"
+	trackingId  = "UA-71704462-1"
 	ApiEndpoint = `https://ssl.google-analytics.com/collect`
 )
 

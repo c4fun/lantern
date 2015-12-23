@@ -14,14 +14,10 @@ import (
 var (
 	log         = golog.LoggerFor("lantern-android.client")
 	appSettings *settings.Settings
-
-	trackingCodes = map[string]string{
-		"FireTweet": "UA-21408036-4",
-		"Lantern":   "UA-21815217-14",
-	}
 )
 
 type Provider interface {
+    Verbose() bool
 	Model() string
 	Device() string
 	Version() string
@@ -42,6 +38,8 @@ func Configure(provider Provider) error {
 	appSettings = settings.Load(lantern.GetVersion(), lantern.GetRevisionDate(), "")
 
     net.Callback = provider.Protect
+
+    golog.Verbose = provider.Verbose()
 
 	return nil
 }
